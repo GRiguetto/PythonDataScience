@@ -89,8 +89,98 @@ O.ShipCountry AS PAÍS,
 ROUND(SUM((OD.Quantity * OD.UnitPrice) * (1 - OD.Discount)),2) AS TOTAL_VENDA
 FROM Orders O
 INNER JOIN [Order Details] OD ON OD.OrderID = O.OrderID
-    GROUP BY 
+GROUP BY 
 O.ShipCity,O.ShipCountry
-    ORDER BY 
+ORDER BY 
 TOTAL_VENDA DESC
 
+--CRIE UMA CONSULTA QUE MOSTRE O PRODUTO MAIS VENDIDO POR PAIS
+--EXEMPLO: ARGENTINA | VINHO | 12000000
+--         BRAZIL    | QUEIJO | 100000
+
+--REANQUEAMENTO DE REGISTROS E SUB CONSULTA
+SELECT *
+FROM
+(
+    SELECT O.ShipCountry AS PAÍS , 
+           P.ProductName AS PRODUTO, 
+           ROUND(SUM((OD.Quantity*OD.UnitPrice) * (1 - OD.Discount)), 2) AS TOTAL_VENDAS,
+           ROW_NUMBER()over (PARTITION BY O.ShipCountry ORDER BY
+           ROUND(SUM((OD.Quantity*OD.UnitPrice) * (1 - OD.Discount)), 2) DESC) AS RANKING
+    FROM Products P 
+    INNER JOIN [Order Details] OD ON P.ProductID = OD.ProductID
+    INNER JOIN Orders O           ON OD.OrderID = O.OrderID
+
+    GROUP BY O.ShipCountry,P.ProductName
+) AS SUB
+WHERE 
+SUB.RANKING = 1 /*AND 
+SUB.PAÍS NOT IN (SELECT Country FROM Customers WHERE  Country LIKE 'A%')*/
+ORDER BY PAÍS
+
+
+--CTEs - COMMOM TABLE EXPRESSION
+
+WITH RANKING AS
+(
+     SELECT O.ShipCountry AS PAÍS , 
+               P.ProductName AS PRODUTO, 
+               ROUND(SUM((OD.Quantity*OD.UnitPrice) * (1 - OD.Discount)), 2) AS TOTAL_VENDAS,
+               ROW_NUMBER()over (PARTITION BY O.ShipCountry ORDER BY
+               ROUND(SUM((OD.Quantity*OD.UnitPrice) * (1 - OD.Discount)), 2) DESC) AS RANKING
+        FROM Products P 
+        INNER JOIN [Order Details] OD ON P.ProductID = OD.ProductID
+        INNER JOIN Orders O           ON OD.OrderID = O.OrderID
+
+        GROUP BY O.ShipCountry,P.ProductName
+),
+TESTE AS 
+(
+    SELECT *
+    FROM Products P
+    WHERE P.Discontinued = 0
+)
+SELECT A.PAÍS, A.PRODUTO, A.TOTAL_VENDAS
+FROM RANKING A
+WHERE 
+    A.RANKING = 1
+ORDER BY A.PAÍS 
+
+
+-- crie uma consulta qu mostre o total em estoque dos produtos
+-- exemplo: VINHA | 50 | 10 | 500 |
+
+SELECT P.ProductName AS PRODUTO, P.UnitsInStock AS QTD, P.UnitPrice AS VLR_UNITARIO,
+       P.UnitsInStock * P.UnitPrice AS TOTAL_ESTOQUE
+FROM Products P 
+ORDER BY PRODUTO
+
+--CRIE UMA CONSULTA QUE MOSTRE O VENDEDOR TOP 1 POR PAIS
+
+WITH RANKING AS
+(
+SELECT O.ShipCountry AS PAÍS,
+       CONCAT(F.FirstName, '' , F.LastName) AS VENDEDOR,
+       ROUND(SUM((OD.Quantity * OD.UnitPrice) * (1 - OD.Discount)),2) AS TOTAL_VENDA,
+       -- CRIANDO RANKING ATRAVÉS DA FUNÇÃO ROW_NUMBER():
+       ROW_NUMBER()OVER (PARTITION BY O.ShipCountry ORDER BY
+       ROUND(SUM((OD.Quantity * OD.UnitPrice) * (1 - OD.Discount)),2) DESC) AS RANKING
+FROM Orders O
+INNER JOIN Employees F ON F.EmployeeID = O.EmployeeID
+INNER JOIN [Order Details] OD ON  O.OrderID = OD.OrderID
+GROUP BY O.ShipCountry, CONCAT(F.FirstName, '' , F.LastName)
+)
+SELECT A.PAÍS, A.VENDEDOR, A.TOTAL_VENDA 
+FROM RANKING A
+WHERE
+   A.RANKING = 1
+ORDER BY A.PAÍS
+
+
+-- CRIE UMA CONSULTA QUE MSTRE OS 10 PRODUTOS MAIS VENDIDSI PELA EMPREA EM TODO O MUNDO
+SELECT TOP 10 P.ProductName AS PRODUTO ,
+       SUM(OD.Quantity) AS TOTAL_VENDIDO
+FROM [Order Details] OD
+INNER JOIN Products P ON P.ProductID = OD.ProductID
+GROUP BY P.ProductName
+ORDER BY TOTAL_VENDIDO DESC
