@@ -120,7 +120,6 @@ ORDER BY PAÍS
 
 
 --CTEs - COMMOM TABLE EXPRESSION
-
 WITH RANKING AS
 (
      SELECT O.ShipCountry AS PAÍS , 
@@ -186,3 +185,42 @@ GROUP BY P.ProductName
 ORDER BY TOTAL_VENDIDO DESC
 
 --CRIE A MSMS CONSULTA ACIMA ACIMA MAS AGORA TRAZENDO OS 10 PRODUTOS QUE MAS FATURARAM
+--23/09
+SELECT TOP 10 P.ProductName AS PRODUTO,
+    ROUND(SUM((OD.Quantity * OD.UnitPrice) * (1- OD.Discount)), 2) AS TOTAL_VENDA
+FROM Products P
+INNER JOIN [Order Details] OD ON OD.ProductID = P.ProductID
+GROUP BY P.ProductName
+
+--faça uma consulta acima porem trazendo somente os produtos com faturamento total
+
+SELECT P.ProductName AS PRODUTO,
+    ROUND(SUM((OD.Quantity * OD.UnitPrice) * (1- OD.Discount)), 2) AS TOTAL_VENDA
+FROM Products P
+INNER JOIN [Order Details] OD ON OD.ProductID = P.ProductID
+GROUP BY P.ProductName
+HAVING ROUND(SUM((OD.Quantity * OD.UnitPrice) * (1- OD.Discount)), 2) >=20000
+ORDER BY TOTAL_VENDA DESC
+--HAVING É USADO EXCLUSIVAMENTE PARA FILTRAR FUNÇOES DE AGREGAÇÃO
+
+
+
+--CRIE UMA VIEW FISICA NO BANCO DE DADOS 
+--CRIE UMA VIEW QUE MOSTRE O RANKING DE PRODUTOS MAIS VENDIDO POR PAIS
+
+--CRIANDO VIEW
+CREATE VIEW V_PRODUTOS_POR_PAIS AS 
+SELECT O.ShipCountry AS PAÍS , 
+       P.ProductName AS PRODUTO, 
+       ROUND(SUM((OD.Quantity*OD.UnitPrice) * (1 - OD.Discount)), 2) AS TOTAL_VENDAS,
+       ROW_NUMBER()over (PARTITION BY O.ShipCountry ORDER BY
+       ROUND(SUM((OD.Quantity*OD.UnitPrice) * (1 - OD.Discount)), 2) DESC) AS RANKING
+FROM Products P 
+INNER JOIN [Order Details] OD ON P.ProductID = OD.ProductID
+INNER JOIN Orders O           ON OD.OrderID = O.OrderID
+GROUP BY O.ShipCountry,P.ProductName
+
+--SELECIONANDO VIEW
+SELECT *
+FROM V_PRODUTOS_POR_PAIS
+
