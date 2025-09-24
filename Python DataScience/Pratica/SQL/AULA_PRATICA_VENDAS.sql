@@ -209,7 +209,7 @@ ORDER BY TOTAL_VENDA DESC
 --CRIE UMA VIEW QUE MOSTRE O RANKING DE PRODUTOS MAIS VENDIDO POR PAIS
 
 --CRIANDO VIEW
-CREATE VIEW V_PRODUTOS_POR_PAIS AS 
+--CREATE VIEW V_PRODUTOS_POR_PAIS AS 
 SELECT O.ShipCountry AS PAÍS , 
        P.ProductName AS PRODUTO, 
        ROUND(SUM((OD.Quantity*OD.UnitPrice) * (1 - OD.Discount)), 2) AS TOTAL_VENDAS,
@@ -221,6 +221,50 @@ INNER JOIN Orders O           ON OD.OrderID = O.OrderID
 GROUP BY O.ShipCountry,P.ProductName
 
 --SELECIONANDO VIEW
-SELECT *
-FROM V_PRODUTOS_POR_PAIS
+--SELECT *
+--FROM V_PRODUTOS_POR_PAIS
 
+
+-- TESTES 
+-------------------ESTADO----------
+SELECT ESTADO,
+	   CATEGORIA,
+	   TOTAL_VENDAS
+FROM (
+SELECT O.ShipRegion AS ESTADO,
+	   C.CategoryName AS CATEGORIA,
+	   ROUND(SUM((OD.Quantity*OD.UnitPrice) * (1 - OD.Discount)), 2) AS TOTAL_VENDAS,
+		ROW_NUMBER()over (PARTITION BY O.ShipRegion ORDER BY
+           ROUND(SUM((OD.Quantity*OD.UnitPrice) * (1 - OD.Discount)), 2) DESC) AS PODIO
+
+FROM Categories C
+
+INNER JOIN Products P         ON P.CategoryID = C.CategoryID
+INNER JOIN [Order Details] OD ON OD.ProductID = P.ProductID
+INNER JOIN Orders O           ON O.OrderID = OD.OrderID
+
+GROUP BY O.ShipRegion, C.CategoryName
+) AS CATEGORIA_PAIS
+WHERE PODIO = 1
+
+-----------------CIDADE---------------
+
+SELECT CIDADE,
+	   CATEGORIA,
+	   TOTAL_VENDAS
+FROM (
+SELECT O.ShipCity AS CIDADE,
+	   C.CategoryName AS CATEGORIA,
+	   ROUND(SUM((OD.Quantity*OD.UnitPrice) * (1 - OD.Discount)), 2) AS TOTAL_VENDAS,
+		ROW_NUMBER()over (PARTITION BY O.ShipCity ORDER BY
+           ROUND(SUM((OD.Quantity*OD.UnitPrice) * (1 - OD.Discount)), 2) DESC) AS PODIO
+
+FROM Categories C
+
+INNER JOIN Products P         ON P.CategoryID = C.CategoryID
+INNER JOIN [Order Details] OD ON OD.ProductID = P.ProductID
+INNER JOIN Orders O           ON O.OrderID = OD.OrderID
+
+GROUP BY O.ShipCity, C.CategoryName
+) AS CATEGORIA_PAIS
+WHERE PODIO = 1
