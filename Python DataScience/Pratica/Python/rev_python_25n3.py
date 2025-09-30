@@ -82,3 +82,134 @@ if (idade < 16 or idade > 69 or peso <= 50) :
 else :
     print ("voce pode doar sangue")
 
+#1 - crie um algoritimo que identifique se um numero é impar ou par
+
+numero = int(input("digite um numero para saber se é par ou impar"))
+
+if numero % 2:
+    print("numero impar")
+else:
+    print("numero par")
+
+# 2- crie um programa que receba a idade e o sakario de uma pessoa
+#se a idade for maior ou igual a 50 e salario menor que 3.500,
+#reajuste o salario em 7.5%
+#se a idade for maior ou igual a 50 e salario maior ou igual a 3500
+#reajuste de 5%
+#senao reajuste em 3.5%
+
+idade = int(input("digite sua idade: "))
+salario = float (input("Digite seu salário: "))
+if idade >= 50 and salario < 3500:
+    tx = 7.5
+elif idade > 50 and salario >= 3500:
+    tx = 5.0
+else:
+    tx = 3.5
+
+novo_salario = salario * (1+(tx/100))
+bruto = novo_salario - salario
+print(f"Seu salario foi ajustado em {tx}%: R${round(novo_salario , 2)}")
+print(f"Diferença bruta: R${round(bruto,2)}")
+
+#29/09/2025
+#revisao: estruturas de repetição em python
+
+# estrutura 'while'
+
+cont = 1# variavel contadora
+while cont <= 10  :
+    print(f"lucimar Show de bola")
+    # incrementando contador
+    cont = cont +1
+
+#faça o mesmo codigo acima mais mostrando o numero da repetição
+
+cont = 1# variavel contadora
+while cont <= 10  :
+    print(f"repetição {cont} lucimar Show de bola")
+    # incrementando contador
+    cont = cont +1
+
+# crie um programa que rece um nume e calcule a sua taboada
+cont = 0
+num = int (input("Digite um numero para saber a taboada dele"))
+while cont <= 10 :
+    print(f"{num} X {cont} = {num * cont}")
+    cont += 1
+print("\nFim de programa!")
+
+#crie um progra que receba uma frase e quantas vezes o ussaurio gostaria de repetiala
+
+cont = 1
+frase = (input("Digite a frase que voce quer repetir"))
+rep = int(input("digite a quantidade de vezes que voce quer repetir a frase"))
+
+while cont <= rep :
+    print(f"{cont} : {frase}")
+    cont += 1
+
+print("fim do programa")
+
+#usando contagem regresiva
+
+frase = (input("Digite a frase que voce quer repetir"))
+rep = int(input("digite a quantidade de vezes que voce quer repetir a frase"))
+
+while cont > 0 :
+    print(f"{frase}")
+    cont = cont - 1
+
+print("fim do programa")
+
+#crie um programa que receba um valor numerico
+#o programa deve imprimir sia sequencia.. do 1 ao valor do numero
+#porem somente os valres impares deverao ser impresso
+
+num = int (input("digite um umero para descobrir a sequencia de impares"))
+cont = 0
+
+while cont <= num :
+    if cont % 2 :
+        print(cont, end=" ")
+    cont += 1
+
+#estrutura de repetição for
+#crie um programa que exiba 100 numeros em tela, use o comando for
+
+for numero in range (1, 101) :
+    print (numero, end = " ")
+
+#crie um programa que receba um nome e subistitua suas vogais pelo oque segue
+# a - @
+# e - 3
+# i - 1
+# o - 0
+# u - v
+
+nome = input("Digite uma nome: ")
+#strip() --> remove espaços em brancos a esqquerda e a direita
+#lower() --> Deixa todas as letras minusculas
+nome = nome.strip().lower()
+nome = nome.replace("a","@").replace("e","3").replace("i","1")\
+    .replace("o", "0").replace("u","v")
+for letra in nome :
+    print(f"{letra.upper()}", end=" ")
+
+#mostre na tela numeros sequencias do 1 ao 500 no entanto somente de 5 em 5
+
+for numero in range (0, 501, 5):
+    if  numero == 0:
+        continue #comando contiune enterrme o lupe e o retorna para o inicio
+    print (numero , end = " ")
+
+#foguete
+cont = 10
+foguete= input("qual o nome do seu foguete")
+while cont > 0 :
+    print(f"{cont}")
+    cont -= 1
+print(f"lancamento do foguete {foguete} iniciado")
+
+for numero in range (1000,0,-1):
+    print (numero, end=" " )
